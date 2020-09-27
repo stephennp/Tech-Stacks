@@ -21,5 +21,6 @@ Whenever some changes are needed on the static routes, you can simply run the bu
 - You have a list of “trending products” | “live data” | etc, that you need populated correctly for every server-side render.
 - Your applications structure is rendered based on JSON files or a CMS where anything could change at any given moment.
 ## References
+- Universal starter: https://github.com/angular/universal-starter
 - What is angular universal: https://blog.angular-university.io/angular-universal/
 - Anguar Universal deep dive: http://medium.com/@MarkPieszak/angular-universal-server-side-rendering-deep-dive-dc442a6be7b7#:~:text=Angular%20Universal%20is%20the%20process,-side%20rendering%20(CSR).
