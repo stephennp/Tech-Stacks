@@ -2,7 +2,8 @@
 # Intro
 
 ## Open sources
-
+### Configure budget size
+- https://angular.io/guide/build#configure-size-budgets
 ### Optimize Angular bundle size in 4 steps
 - https://medium.com/angular-in-depth/optimize-angular-bundle-size-in-4-steps-4a3b3737bf45
 ### Awesome Angular
