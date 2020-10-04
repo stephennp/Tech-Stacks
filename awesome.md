@@ -1,6 +1,8 @@
 # Intro
 - List all awesome technologies
 
+## Awesome opensources
+- https://awesomeopensource.com/
 ## Awesome Angular
 - https://github.com/PatrickJS/awesome-angular
 ## Awesome React

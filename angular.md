@@ -2,6 +2,9 @@
 # Intro
 
 ## Open sources
+
+### Optimize Angular bundle size in 4 steps
+- https://medium.com/angular-in-depth/optimize-angular-bundle-size-in-4-steps-4a3b3737bf45
 ### Awesome Angular
 - Awesome list of Angular seed repos, starters, boilerplates, examples, tutorials, components, modules, videos and anything else in the Angular ecosystem.
 - Link: https://github.com/PatrickJS/awesome-angular
