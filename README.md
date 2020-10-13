@@ -1,7 +1,9 @@
 # Tech-Stacks
 - This file list all the common new tech stacks for Web app
 - Programming languages: c#, python, nodejs, flutter
-
+- Frameworks: 
+- Features:
+- Securities:
 ## Frontend
 
 ## Backend
