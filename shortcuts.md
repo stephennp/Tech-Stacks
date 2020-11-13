@@ -28,3 +28,9 @@
 
     dotnet new -h|--help
 ```
+
+## Visual Code
+
+ - Multiple selections (multi-cursor):
+  - `Ctrl+Alt+Down` or `Ctrl+Alt+Up` that insert cursors below or above.
+  - `Alt+Click`
