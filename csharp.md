@@ -12,3 +12,6 @@
   - In C#, it is `possible` to implement `interfaces, inherit from other classes and allow inheritance with Singleton class`. These are `not` possible with a `static` class. So the Singleton class is more flexible as compared to static classes.
   - We `can clone` the `Singleton` class object whereas it is `not possible` to clone a `static` class. It is possible to `dispose` of the objects of a `singleton` class whereas it is `not possible` to dispose of a `static` class.
   - We cannot implement the Dependency Injection design pattern using Static class because the static class is not interface driven.
+
+## Overview of C# Async Programming
+- https://dzone.com/articles/overview-of-c-async-programming-with-thread-pools
