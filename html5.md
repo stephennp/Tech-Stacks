@@ -1,5 +1,9 @@
 # Intro
 
+# Definition
+
+## HTML version
+- Declare <!DOCTYPE html>
 # SEO
 
 ## What HTML5 Means For SEO:
