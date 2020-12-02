@@ -17,6 +17,17 @@
 
 - If you do the math, the two digits for one color equal 16 times 16, which gives us 256 total values. So RGB, which starts counting from zero, has the exact same number of possible values as hex code.
 
+# Use CSS Variables
+- Syntax: `var(name, value)`
+- CSS variables can have a `global or local` scope.
+  - To create a variable with global scope, declare it inside the `:root` selector.
+  ```css
+    :root {
+    --blue: #1e90ff;
+    --white: #ffffff;
+    }
+  ``` 
+
 # Override styles order
 - !important> style > id > class (top-> bottom class declaration in <style> section)
 
