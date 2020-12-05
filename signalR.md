@@ -32,8 +32,31 @@ this.connection = new signalR.HubConnectionBuilder()
 - `Max concurrent requests per application`: Increasing the number of concurrent IIS requests will increase server resources available for serving requests. The default value is 5000; to increase this setting, execute the following commands in an elevated command prompt:
 - `ApplicationPool QueueLength`: This is the maximum number of requests that Http.sys queues for the application pool. When the queue is full, new requests receive a 503 "Service Unavailable" response. The default value is 1000.
 
+### Long Polling
+### 5. SSE & Websocket
+- Advantages of SSE over Websockets:
+  - Transported over simple HTTP instead of a custom protocol
+  - Can be poly-filled with javascript to "backport" SSE to browsers that do not support it yet.
+  - Built in support for re-connection and event-id
+  - Simpler protocol
+  - No trouble with corporate firewalls doing packet inspection
+
+- Advantages of Websockets over SSE:
+  - Real time, two directional communication.
+  - Native support in more browsers
+
+- Ideal use cases of SSE:
+  - Stock ticker streaming
+  - twitter feed updating
+  - Notifications to browser
+
+- SSE gotchas:
+  - No binary support
+  - Maximum open connections limit
+
 ## Security considerations
 - https://docs.microsoft.com/en-us/aspnet/core/signalr/security?view=aspnetcore-3.1
 ## References:
 - https://docs.microsoft.com/en-us/aspnet/core/signalr/authn-and-authz?view=aspnetcore-3.1#use-claims-to-customize-identity-handling
 - https://docs.microsoft.com/en-us/aspnet/core/signalr/groups?view=aspnetcore-3.1
+- Polling vs SSE vs Websocket: https://codeburst.io/polling-vs-sse-vs-websocket-how-to-choose-the-right-one-1859e4e13bd9
