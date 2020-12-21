@@ -13,5 +13,8 @@
   - We `can clone` the `Singleton` class object whereas it is `not possible` to clone a `static` class. It is possible to `dispose` of the objects of a `singleton` class whereas it is `not possible` to dispose of a `static` class.
   - We cannot implement the Dependency Injection design pattern using Static class because the static class is not interface driven.
 
+## Compare two string ignoring case
+- https://stackoverflow.com/questions/6371150/comparing-two-strings-ignoring-case-in-c-sharp
+
 ## Overview of C# Async Programming
 - https://dzone.com/articles/overview-of-c-async-programming-with-thread-pools
