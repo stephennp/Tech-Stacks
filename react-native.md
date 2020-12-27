@@ -16,7 +16,8 @@
  - Update Android API version if needed
  - Add local.properties file at Android `app/src` with sdk directory:
     - `sdk.dir=C\:\\Users\\Dat Ngo\\AppData\\Local\\Android\\Sdk`
-
+  - Add `google-services.json` to folder `android\app`
+    - Also update package name `android_client_info.package_name` 
 ## Development
 - Debugger: `http://localhost:8081/debugger-ui/`
 
