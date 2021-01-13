@@ -5,5 +5,7 @@
 
 - By default the `JWT authentication handler` in .NET will map the `sub claim` of a JWT access token to the `System.Security.Claims.ClaimTypes.NameIdentifier` claim type
 
+## Various flow
+- https://developers.onelogin.com/openid-connect/api/client-credentials-grant
 ## Openidict
 - https://kevinchalet.com/2017/01/30/implementing-simple-token-authentication-in-aspnet-core-with-openiddict/

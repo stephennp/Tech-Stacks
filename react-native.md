@@ -18,9 +18,13 @@
     - `sdk.dir=C\:\\Users\\Dat Ngo\\AppData\\Local\\Android\\Sdk`
   - Add `google-services.json` to folder `android\app`
     - Also update package name `android_client_info.package_name` 
+
+
 ## Development
 - Debugger: `http://localhost:8081/debugger-ui/`
 
+## Flutter vs React-Native
+- https://vvsevolodovich.dev/flutter-vs-react-native-comparison-in-depth/
 ## Troubleshooting
 - Execution failed for task `':app:processDebugGoogleServices'. Failed to delete: \google-services\debug`
   - Just delete `build` folder inside `android/app/` and run as an administrator your cmd.
