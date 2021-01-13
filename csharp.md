@@ -16,5 +16,35 @@
 ## Compare two string ignoring case
 - https://stackoverflow.com/questions/6371150/comparing-two-strings-ignoring-case-in-c-sharp
 
+## Enums and Constants. Which to use when?
+- Use enums when you want to define a range of values that something can be. Colour is an obvious example like:
+
+```csharp
+public enum Colour
+{
+    White,
+    Red,
+    Blue
+}
+```
+- Or maybe a set of possible things like: (Example I stole from here as I'm lazy)
+
+```csharp
+[FlagsAttribute]
+enum DistributedChannel
+{
+  None = 0,
+  Transacted = 1,
+  Queued = 2,
+  Encrypted = 4,
+  Persisted = 16,
+  FaultTolerant = Transacted | Queued | Persisted
+}
+```
+- Constants should be for a single value, like PI. There isn't a range of PI values, there is just PI.
+
+- Other points to consider are:
+  - a: Constants don't necessarily indicate a relationship between the constants, whereas an enumeration indicates that something can be one of the set defined by the enum.
+  - b: A defined enumeration can help you with type checking when used as an argument. Constants are just values, so they don't provide any additional semantic information.
 ## Overview of C# Async Programming
 - https://dzone.com/articles/overview-of-c-async-programming-with-thread-pools

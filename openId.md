@@ -7,5 +7,7 @@
 
 ## 
 - https://dzone.com/articles/the-right-flow-for-the-job-which-oauth-20-flow-sho
+## Various flow
+- https://developers.onelogin.com/openid-connect/api/client-credentials-grant
 ## Openidict
 - https://kevinchalet.com/2017/01/30/implementing-simple-token-authentication-in-aspnet-core-with-openiddict/
