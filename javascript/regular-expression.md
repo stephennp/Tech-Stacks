@@ -386,7 +386,7 @@ rainbowRegex.test(american); // Returns true
 rainbowRegex.test(british); // Returns true
 ```
 
-## Positive and Negative Lookahead
+## Positive and Negative Lookahead (?=) (?!)
 
 - `Lookaheads` are patterns that tell JavaScript to look-ahead in your string to check for patterns further along. This can be useful when you want to search for multiple patterns over the same string.
 
@@ -413,6 +413,54 @@ noquit.match(qRegex); // Returns ["q"]
 let password = "abc123";
 let checkPass = /(?=\w{3,6})(?=\D*\d)/;
 checkPass.test(password); // Returns true
+```
+
+## Palindrome Checker
+
+- Return true if the given string is a palindrome. Otherwise, return false.
+
+- A palindrome is a word or sentence that's spelled the same way both forward and backward, ignoring punctuation, case, and spacing.
+
+- Note: You'll need to remove all non-alphanumeric characters (punctuation, spaces and symbols) and turn everything into the same case (lower or upper case) in order to check for palindromes.
+
+- We'll pass strings with varying formats, such as "racecar", "RaceCar", and "race CAR" among others.
+
+- We'll also pass strings with special symbols, such as "2A3*3a2", "2A3 3a2", and "2_A3*3#A2".
+
+- Solution 1: using for loop and regex pattern
+
+```javascript
+function palindrome(str) {
+  var regex = /([^\w\d])|(_)+/gi;
+  var newStr = str.replace(regex, "").toLowerCase();
+  var reverseStr = "";
+  for (let i = newStr.length - 1; i >= 0; i = i - 1) {
+    reverseStr += newStr[i];
+  }
+  if (newStr == reverseStr) {
+    return true;
+  }
+  return false;
+}
+
+palindrome("A man, a plan, a canal. Panama");
+```
+
+- Solution 2: using for loop , regex and divided two parts of a string length
+
+```javascript
+function palindrome(str) {
+  var str = str.replace(/[\W_]+/gi, "").toLowerCase();
+  for (let i = 0, len = str.length - 1; i <= len / 2; i++) {
+    if (str[i] !== str[len - i]) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+palindrome("racecar");
 ```
 
 ## Check For Mixed Grouping of Characters ()
@@ -447,10 +495,13 @@ repeatRegex.test(repeatStr); // Returns true
 repeatStr.match(repeatRegex); // Returns ["regex regex", "regex"]
 Using the .match() method on a string will return an array with the string it matches, along with its capture group.
 ```
+
 ## Use Capture Groups to Search and Replace
+
 - Searching is useful. However, you can make searching even more powerful when it also changes (or replaces) the text you match.
 
 - You can search and replace text in a string using .replace() on a string. The inputs for .replace() is first the regex pattern you want to search for. The second parameter is the string to replace the match or a function to do something.
+
 ```javascript
 let wrongText = "The sky is silver.";
 let silverRegex = /silver/;
@@ -460,4 +511,4 @@ You can also access capture groups in the replacement string with dollar signs (
 
 "Code Camp".replace(/(\w+)\s(\w+)/, '$2 $1');
 // Returns "Camp Code"
-``` 
+```
