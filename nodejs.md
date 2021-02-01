@@ -257,6 +257,50 @@ app.use(bodyParser.json());
 
 Do not forget that all these statements need to go above any routes that might have been defined.
 
+## Set up a Template Engine (Pug)
+
+- A template engine enables you to use static template files (such as those written in `Pug`) in your app. At runtime, the template engine replaces variables in a template file with actual values which can be supplied by your server. Then it transforms the template into a static HTML file that is sent to the client. This approach makes it easier to design an HTML page and allows for displaying variables on the page without needing to make an API call from the client.
+
+- Add pug@~3.0.0 as a dependency in your package.json file.
+
+- Express needs to know which template engine you are using. We will use the set method to assign pug as the view engine property's value: `app.set('view engine', 'pug')`
+
+- Your page will not load until you correctly render the index file in the views/pug directory.
+
+- Change the argument of the `res.render()` declaration in the / route to be the file path to the `views/pug` directory. The path can be a relative path (relative to views), or an absolute path, and does not require a file extension.
+
+- If all went as planned, your app home page will stop showing the message "Pug template is not defined." and will now display a message indicating you've successfully rendered the Pug template!
+- Note: The view engine cache does not cache the contents of the template’s output, only the underlying template itself. The view is still re-rendered with every request even when the cache is on.
+- Install module `npm install pug --save`
+- Create pug template file `index.pug`
+
+```
+html
+  head
+    title= title
+  body
+    h1= message
+```
+
+```javascript
+// template engine with pug
+app.set("view engine", "pug");
+app.get("/template-engine", function (req, res) {
+  res.render("index", { title: "Hey guy", message: "Hello there !!" });
+});
+```
+##  Use a Template Engine's Powers
+One of the greatest features of using a template engine is being able to pass variables from the server to the template file before rendering it to HTML.
+
+In your Pug file, you're able to use a variable by referencing the variable name as #{variable_name} inline with other text on an element or by using an equal sign on the element without a space such as p=variable_name which assigns the variable's value to the p element's text.
+
+We strongly recommend looking at the syntax and structure of Pug here on GitHub's README. Pug is all about using whitespace and tabs to show nested elements and cutting down on the amount of code needed to make a beautiful site.
+
+Looking at our pug file 'index.pug' included in your project, we used the variables title and message.
+
+To pass those along from our server, you will need to add an object as a second argument to your res.render with the variables and their values. For example, pass this object along setting the variables for your index view: {title: 'Hello', message: 'Please login'}
+
+It should look like: res.render(process.cwd() + '/views/pug/index', {title: 'Hello', message: 'Please login'}); Now refresh your page and you should see those values rendered in your view in the correct spot as laid out in your index.pug file!
 # References
 
 - Middleware : https://expressjs.com/en/guide/using-middleware.html
