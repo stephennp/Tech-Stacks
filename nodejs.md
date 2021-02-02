@@ -643,28 +643,31 @@ passport.use(new GitHubStrategy({
   }
 ));
 ```
+
 ## Implementation of Social Authentication III
+
 - The final part of the strategy is handling the profile returned from GitHub. We need to load the user's database object if it exists, or create one if it doesn't, and populate the fields from the profile, then return the user's object. GitHub supplies us a unique id within each profile which we can use to search with to serialize the user with (already implemented). Below is an example implementation you can use in your project--it goes within the function that is the second argument for the new strategy, right below where console.log(profile); currently is:
+
 ```javascript
 myDataBase.findOneAndUpdate(
   { id: profile.id },
   {
     $setOnInsert: {
       id: profile.id,
-      name: profile.displayName || 'John Doe',
-      photo: profile.photos[0].value || '',
+      name: profile.displayName || "John Doe",
+      photo: profile.photos[0].value || "",
       email: Array.isArray(profile.emails)
         ? profile.emails[0].value
-        : 'No public email',
+        : "No public email",
       created_on: new Date(),
-      provider: profile.provider || ''
+      provider: profile.provider || "",
     },
     $set: {
-      last_login: new Date()
+      last_login: new Date(),
     },
     $inc: {
-      login_count: 1
-    }
+      login_count: 1,
+    },
   },
   { upsert: true, new: true },
   (err, doc) => {
@@ -672,7 +675,77 @@ myDataBase.findOneAndUpdate(
   }
 );
 ```
+
 - `findOneAndUpdate` allows you to search for an object and update it. If the object doesn't exist, it will be`inserted `and made available to the callback function. In this example, we always set last_login, increment the login_count by 1, and only populate the majority of the fields when a new object (new user) is inserted. Notice the use of default values. Sometimes a profile returned won't have all the information filled out or the user will keep it private. In this case, you handle it to prevent an error.
+
+## Set up the Environment
+
+- The following challenges will make use of the chat.pug file. So, in your routes.js file, add a GET route pointing to /chat which makes use of ensureAuthenticated, and renders chat.pug, with `{ user: req.user }` passed as an argument to the response. Now, alter your existing `/auth/github/callback` route to set the `req.session.user_id = req.user.id`, and redirect to `/chat`.
+
+- Add http and socket.io as a dependency and require/instantiate them in your server defined as follows:
+
+```javascript
+const http = require("http").createServer(app);
+const io = require("socket.io")(http);
+```
+
+- Now that the http server is mounted on the express app, you need to listen from the http server. Change the line with `app.listen to http.listen`.
+
+- The first thing needing to be handled is listening for a new connection from the client. The on keyword does just that- listen for a specific event. It requires 2 arguments: a string containing the title of the event thats emitted, and a function with which the data is passed though. In the case of our connection listener, we use socket to define the data in the second argument. A socket is an individual client who is connected.
+
+- To listen for connections to your server, add the following within your database connection:
+
+```javascript
+io.on("connection", (socket) => {
+  console.log("A user has connected");
+});
+```
+
+- Now for the client to connect, you just need to add the following to your client.js which is loaded by the page after you've authenticated:
+
+```javascript
+/_global io_/;
+let socket = io();
+```
+
+- The comment suppresses the error you would normally see since 'io' is not defined in the file. We've already added a reliable CDN to the Socket.IO library on the page in chat.pug.
+
+- Now try loading up your app and authenticate and you should see in your server console 'A user has connected'!
+
+- Note:io() works only when connecting to a socket hosted on the same url/server. For connecting to an external socket hosted elsewhere, you would use io.connect('URL');
+
+## Communicate by Emitting
+
+- Emit is the most common way of communicating you will use. When you emit something from the server to `io`, you send an event's name and data to all the connected sockets. A good example of this concept would be emitting the current count of connected users each time a new user connects!
+
+- Start by adding a variable to keep track of the users, just before where you are currently listening for connections.
+
+```javascript
+let currentUsers = 0;
+```
+
+- Now, when someone connects, you should increment the count before emitting the count. So, you will want to add the incrementer within the connection listener.
+
+```javascript
+++currentUsers;
+```
+
+- Finally, after incrementing the count, you should emit the event (still within the connection listener). The event should be named 'user count', and the data should just be the currentUsers.
+
+```javascript
+io.emit("user count", currentUsers);
+```
+
+- Now, you can implement a way for your client to listen for this event! Similar to listening for a connection on the server, you will use the on keyword.
+
+```javascript
+socket.on("user count", function (data) {
+  console.log(data);
+});
+```
+
+- Now, try loading up your app, authenticate, and you should see in your client console '1' representing the current user count! Try loading more clients up, and authenticating to see the number go up.
+
 # References:
 
 - https://stackoverflow.com/questions/27637609/understanding-passport-serialize-deserialize# References
