@@ -257,6 +257,37 @@ app.use(bodyParser.json());
 
 Do not forget that all these statements need to go above any routes that might have been defined.
 
+## Get Data from POST Requests
+
+- Mount a POST handler at the path /name. It’s the same path as before. We have prepared a form in the html frontpage. It will submit the same data of exercise 10 (Query string). If the body-parser is configured correctly, you should find the parameters in the object req.body. Have a look at the usual library example:
+
+```javascript
+route: POST '/library'
+urlencoded_body: userId=546&bookId=6754
+req.body: {userId: '546', bookId: '6754'}
+```
+
+- Respond with the same JSON object as before: {name: 'firstname lastname'}. Test if your endpoint works using the html form we provided in the app frontpage.
+
+- Tip: There are several other http methods other than GET and POST. And by convention there is a correspondence between the http verb, and the operation you are going to execute on the server. The conventional mapping is:
+
+- POST (sometimes PUT) - Create a new resource using the information sent with the request,
+
+- GET - Read an existing resource without modifying it,
+
+- PUT or PATCH (sometimes POST) - Update a resource using the data sent,
+
+- DELETE => Delete a resource.
+
+## Timestamp mircoservice
+
+## Request header parser microservice
+
+## URL shorter microservice
+
+## Exercise tracker
+
+## File metadata microservice
 ## Set up a Template Engine (Pug)
 
 - A template engine enables you to use static template files (such as those written in `Pug`) in your app. At runtime, the template engine replaces variables in a template file with actual values which can be supplied by your server. Then it transforms the template into a static HTML file that is sent to the client. This approach makes it easier to design an HTML page and allows for displaying variables on the page without needing to make an API call from the client.
@@ -747,17 +778,21 @@ socket.on("user count", function (data) {
 - Now, try loading up your app, authenticate, and you should see in your client console '1' representing the current user count! Try loading more clients up, and authenticating to see the number go up.
 
 ## Handle a Disconnect
+
 - You may notice that up to now you have only been increasing the user count. Handling a user disconnecting is just as easy as handling the initial connect, except you have to listen for it on each socket instead of on the whole server.
 
 - To do this, add another listener inside the existing `connect` listener that listens for `disconnect` on the socket with no data passed through. You can test this functionality by just logging that a user has disconnected to the console.
+
 ```javascript
-socket.on('disconnect', () => {
+socket.on("disconnect", () => {
   /*anything you want to do on disconnect*/
 });
 ```
+
 - To make sure clients continuously have the updated count of current users, you should decrease the currentUsers by 1 when the disconnect happens then emit the 'user count' event with the updated count!
 
 - Note: Just like 'disconnect', all other events that a socket can emit to the server should be handled within the connecting listener where we have 'socket' defined.
+
 # References:
 
 - https://stackoverflow.com/questions/27637609/understanding-passport-serialize-deserialize# References
