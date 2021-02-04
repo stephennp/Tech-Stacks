@@ -979,3 +979,1485 @@ componentWillMount() {
   console.log('Component being mounted');
 }
 ```
+
+## Use the Lifecycle Method componentDidMount
+
+- Most web developers, at some point, need to call an API endpoint to retrieve data. If you're working with React, it's important to know where to perform this action.
+
+The best practice with React is to place API calls or any calls to your server in the lifecycle method `componentDidMount()`. This method is called `after a component is mounted to the DOM`. Any calls to `setState()` here will `trigger a re-rendering of your component`. When you call an API in this method, and set your state with the data that the API returns, it will automatically trigger an update once you receive the data.
+
+There is a mock API call in componentDidMount(). It sets state after 2.5 seconds to simulate calling a server to retrieve data. This example requests the current total active users for a site. In the render method, render the value of activeUsers in the h1 after the text Active Users:. Watch what happens in the preview, and feel free to change the timeout to see the different effects.
+
+```javascript
+render() {
+    return (
+      <div>
+        <h1>Active Users: { this.state.activeUsers }</h1>
+      </div>
+    );
+  }
+
+```
+
+## Add Event Listeners
+
+- The `componentDidMount()` method is also the best place to attach any `event listeners` you need to add for specific functionality. React provides a synthetic event system which wraps the native event system present in browsers. This means that the synthetic event system behaves exactly the same regardless of the user's browser - even if the native events may behave differently between different browsers.
+
+- You've already been using some of these synthetic event handlers such as `onClick()`. React's synthetic event system is great to use for most interactions you'll manage on DOM elements. However, if you want to attach an event handler to the document or window objects, you have to do this directly.
+
+- Attach an event listener in the componentDidMount() method for keydown events and have these events trigger the callback handleKeyPress(). You can use document.addEventListener() which takes the event (in quotes) as the first argument and the callback as the second argument.
+
+- Then, in `componentWillUnmount()`, remove this same event listener. You can pass the same arguments to document.removeEventListener(). It's good practice to use this lifecycle method to do any clean up on React components before they are unmounted and destroyed. Removing event listeners is an example of one such clean up action.
+
+```javascript
+class MyComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      message: "",
+    };
+    this.handleEnter = this.handleEnter.bind(this);
+    this.handleKeyPress = this.handleKeyPress.bind(this);
+  }
+  // change code below this line
+  componentDidMount() {
+    document.addEventListener("keydown", this.handleKeyPress);
+  }
+  componentWillUnmount() {
+    document.removeEventListener("keydown", this.handleKeyPress);
+  }
+  // change code above this line
+  handleEnter() {
+    this.setState({
+      message: this.state.message + "You pressed the enter key! ",
+    });
+  }
+  handleKeyPress(event) {
+    if (event.keyCode === 13) {
+      this.handleEnter();
+    }
+  }
+  render() {
+    return (
+      <div>
+        <h1>{this.state.message}</h1>
+      </div>
+    );
+  }
+}
+```
+
+## Optimize Re-Renders with shouldComponentUpdate
+
+- So far, if any component receives `new state or new props`, it `re-renders itself and all its children`. This is usually okay. But React provides a lifecycle method you can call when child components receive new state or props, and declare specifically if the components should update or not. The method is `shouldComponentUpdate()`, and it takes nextProps and nextState as parameters.
+
+- This method is a useful way to optimize performance. For example, the default behavior is that your component re-renders when it receives new props, even if the props haven't changed. You can use shouldComponentUpdate() to prevent this by comparing the props. The method must return a `boolean` value that tells React `whether or not to update the component`. You can compare the current props (this.props) to the next props (nextProps) to determine if you need to update or not, and return true or false accordingly.
+
+- The `shouldComponentUpdate()` method is added in a component called `OnlyEvens`. Currently, this method returns true so OnlyEvens re-renders every time it receives new props. Modify the method so OnlyEvens updates only if the value of its new props is even. Click the Add button and watch the order of events in your browser's console as the lifecycle hooks are triggered.
+
+```javascript
+class OnlyEvens extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  shouldComponentUpdate(nextProps, nextState) {
+    console.log("Should I update?");
+    // change code below this line
+    if (nextProps.value % 2 == 0) {
+      return true;
+    }
+    return false;
+    // change code above this line
+  }
+  componentWillReceiveProps(nextProps) {
+    console.log("Receiving new props...");
+  }
+  componentDidUpdate() {
+    console.log("Component re-rendered.");
+  }
+  render() {
+    return <h1>{this.props.value}</h1>;
+  }
+}
+
+class Controller extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      value: 0,
+    };
+    this.addValue = this.addValue.bind(this);
+  }
+  addValue() {
+    this.setState({
+      value: this.state.value + 1,
+    });
+  }
+  render() {
+    return (
+      <div>
+        <button onClick={this.addValue}>Add</button>
+        <OnlyEvens value={this.state.value} />
+      </div>
+    );
+  }
+}
+```
+
+## Introducing Inline Styles
+
+- There are other complex concepts that add powerful capabilities to your React code. But you may be wondering about the more simple problem of how to style those JSX elements you create in React. You likely know that it won't be exactly the same as working with HTML because of the way you apply classes to JSX elements.
+
+- If you import styles from a stylesheet, it isn't much different at all. You apply a class to your JSX element using the className attribute, and apply styles to the class in your stylesheet. Another option is to apply inline styles, which are very common in ReactJS development.
+
+- You apply inline styles to JSX elements similar to how you do it in HTML, but with a few JSX differences. Here's an example of an inline style in HTML:
+
+```html
+<div style="color: yellow; font-size: 16px">Mellow Yellow</div>
+```
+
+- JSX elements use the style attribute, but because of the way JSX is transpiled, you can't set the value to a string. Instead, you set it equal to a JavaScript object. Here's an example:
+
+```html
+<div style={{color: "yellow", fontSize: 16}}>Mellow Yellow</div>
+```
+
+- Notice how we camelCase the "fontSize" property? This is because React will not accept kebab-case keys in the style object. React will apply the correct property name for us in the HTML.
+
+## Add Inline Styles in React
+
+- You may have noticed in the last challenge that there were several other syntax differences from HTML inline styles in addition to the style attribute set to a JavaScript object. First, the names of certain CSS style properties use camel case. For example, the last challenge set the size of the font with fontSize instead of font-size. Hyphenated words like font-size are invalid syntax for JavaScript object properties, so React uses camel case. As a rule, any hyphenated style properties are written using camel case in JSX.
+
+- All property value length units (like height, width, and fontSize) are assumed to be in px unless otherwise specified. If you want to use em, for example, you wrap the value and the units in quotes, like {fontSize: "4em"}. Other than the length values that `default to px`, all other property values should be wrapped in quotes.
+
+- If you have a large set of styles, you can assign a style object to a constant to keep your code organized. Initialize a styles constant and assign an object with three style properties and their values to it. Give the div a color of "purple", a font-size of 40, and a border of "2px solid purple". Then set the style attribute equal to the styles constant.
+
+```javascript
+const styles = {
+  color: "purple",
+  fontSize: 40,
+  border: "2px solid purple",
+};
+
+class Colorful extends React.Component {
+  render() {
+    // change code below this line
+    return <div style={styles}>Style Me!</div>;
+    // change code above this line
+  }
+}
+```
+
+## Use Advanced JavaScript in React Render Method
+
+- In previous challenges, you learned how to inject JavaScript code into JSX code using curly braces, `{ }`, for tasks like `accessing props, passing props, accessing state, inserting comments into your code, and most recently, styling your components`. These are all common use cases to put JavaScript in JSX, but they aren't the only way that you can utilize JavaScript code in your React components.
+
+- You can also write JavaScript directly in your render methods, before the return statement, without inserting it inside of curly braces. This is because it is not yet within the JSX code. When you want to use a variable later in the JSX code inside the return statement, you place the variable name inside curly braces.
+
+- In the code provided, the render method has an array that contains 20 phrases to represent the answers found in the classic 1980's Magic Eight Ball toy. The button click event is bound to the ask method, so each time the button is clicked a random number will be generated and stored as the randomIndex in state. On line 52, delete the string "change me!" and reassign the answer const so your code randomly accesses a different index of the possibleAnswers array each time the component updates. Finally, insert the answer const inside the p tags.
+
+```javascript
+const inputStyle = {
+  width: 235,
+  margin: 5,
+};
+
+class MagicEightBall extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      userInput: "",
+      randomIndex: "",
+    };
+    this.ask = this.ask.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+  }
+  ask() {
+    if (this.state.userInput) {
+      this.setState({
+        randomIndex: Math.floor(Math.random() * 20),
+        userInput: "",
+      });
+    }
+  }
+  handleChange(event) {
+    this.setState({
+      userInput: event.target.value,
+    });
+  }
+  render() {
+    const possibleAnswers = [
+      "It is certain",
+      "It is decidedly so",
+      "Without a doubt",
+      "Yes, definitely",
+      "You may rely on it",
+      "As I see it, yes",
+      "Outlook good",
+      "Yes",
+      "Signs point to yes",
+      "Reply hazy try again",
+      "Ask again later",
+      "Better not tell you now",
+      "Cannot predict now",
+      "Concentrate and ask again",
+      "Don't count on it",
+      "My reply is no",
+      "My sources say no",
+      "Most likely",
+      "Outlook not so good",
+      "Very doubtful",
+    ];
+    const answer = "change me!"; // Change this line
+    return (
+      <div>
+        <input
+          type='text'
+          value={this.state.userInput}
+          onChange={this.handleChange}
+          style={inputStyle}
+        />
+        <br />
+        <button onClick={this.ask}>Ask the Magic Eight Ball!</button>
+        <br />
+        <h3>Answer:</h3>
+        <p>
+          const answer = possibleAnswers[this.state.randomIndex];
+          <p>{answer}</p>
+        </p>
+      </div>
+    );
+  }
+}
+```
+
+## Render with an If-Else Condition
+
+- Another application of using JavaScript to control your rendered view is to tie the elements that are rendered to a condition. When the condition is true, one view renders. When it's false, it's a different view. You can do this with a standard if/else statement in the render() method of a React component.
+
+- MyComponent contains a boolean in its state which tracks whether you want to display some element in the UI or not. The button toggles the state of this value. Currently, it renders the same UI every time. Rewrite the `render()` method with an `if/else` statement so that if display is true, you return the current markup. Otherwise, return the markup without the h1 element.
+
+- Note: You must write an if/else to pass the tests. Use of the ternary operator will not pass here.
+
+```javascript
+
+class MyComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      display: true
+    }
+ this.toggleDisplay = this.toggleDisplay.bind(this);
+ }
+  toggleDisplay() {
+    this.setState({
+      display: !this.state.display
+    });
+  }
+  render() {
+    // change code below this line
+    if (this.state.display) {
+      return (
+         <div>
+           <button onClick={this.toggleDisplay}>Toggle Display</button>
+           <h1>Displayed!</h1>
+         </div>
+      );
+    } else {
+      return (
+        <div>
+           <button onClick={this.toggleDisplay}>Toggle Display</button>
+         </div>
+      );
+    }
+  }
+```
+
+## Use && for a More Concise Conditional
+
+- The `if/else` statements worked in the last challenge, but there's a more concise way to achieve the same result. Imagine that you are tracking several conditions in a component and you want different elements to render depending on each of these conditions. If you write a lot of else if statements to return slightly different UIs, you may repeat code which leaves room for error. Instead, you can use the && logical operator to perform conditional logic in a more concise way. This is possible because you want to check if a condition is true, and if it is, return some markup. Here's an example:
+
+```javascript
+{
+  condition && <p>markup</p>;
+}
+```
+
+- If the condition is true, the markup will be returned. If the condition is false, the operation will immediately return false after evaluating the condition and return nothing. You can include these statements directly in your JSX and string multiple conditions together by writing && after each one. This allows you to handle more complex conditional logic in your render() method without repeating a lot of code.
+
+- Solve the previous example again, so the h1 only renders if display is true, but use the && logical operator instead of an if/else statement.
+
+```javascript
+class MyComponent extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      display: true,
+    };
+    this.toggleDisplay = this.toggleDisplay.bind(this);
+  }
+  toggleDisplay() {
+    this.setState((state) => ({
+      display: !state.display,
+    }));
+  }
+  render() {
+    // change code below this line
+    return (
+      <div>
+        <button onClick={this.toggleDisplay}>Toggle Display</button>
+        {this.state.display && <h1>Displayed!</h1>}
+      </div>
+    );
+  }
+}
+```
+
+## Use a Ternary Expression for Conditional Rendering
+
+```javascript
+condition ? expressionIfTrue : expressionIfFalse;
+```
+
+- The code editor has three constants defined within the CheckUserAge component's render() method. They are called buttonOne, buttonTwo, and buttonThree. Each of these is assigned a simple JSX expression representing a button element. First, initialize the state of CheckUserAge with input and userAge both set to values of an empty string.
+
+- Once the component is rendering information to the page, users should have a way to interact with it. Within the component's return statement, set up a ternary expression that implements the following logic: when the page first loads, render the submit button, buttonOne, to the page. Then, when a user enters their age and clicks the button, render a different button based on the age. If a user enters a number less than 18, render buttonThree. If a user enters a number greater than or equa
+
+## Use Array.map() to Dynamically Render Elements
+
+- Conditional rendering is useful, but you may need your components to render an unknown number of elements. Often in reactive programming, a programmer has no way to know what the state of an application is until runtime, because so much depends on a user's interaction with that program. Programmers need to write their code to correctly handle that unknown state ahead of time. Using `Array.map()` in React illustrates this concept.
+
+-For example, you create a simple "To Do List" app. As the programmer, you have no way of knowing how many items a user might have on their list. You need to set up your component to dynamically render the correct number of list elements long before someone using the program decides that today is laundry day.
+
+```javascript
+const textAreaStyles = {
+  width: 235,
+  margin: 5,
+};
+
+class MyToDoList extends React.Component {
+  constructor(props) {
+    super(props);
+    // change code below this line
+    this.state = {
+      userInput: "",
+      toDoList: [],
+    };
+    // change code above this line
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+  }
+  handleSubmit() {
+    const itemsArray = this.state.userInput.split(",");
+    this.setState({
+      toDoList: itemsArray,
+    });
+  }
+  handleChange(e) {
+    this.setState({
+      userInput: e.target.value,
+    });
+  }
+  render() {
+    const items = this.state.toDoList.map((i) => <li>{i}</li>); // change code here
+    return (
+      <div>
+        <textarea
+          onChange={this.handleChange}
+          value={this.state.userInput}
+          style={textAreaStyles}
+          placeholder='Separate Items With Commas'
+        />
+        <br />
+        <button onClick={this.handleSubmit}>Create List</button>
+        <h1>My "To Do" List:</h1>
+        <ul>{items}</ul>
+      </div>
+    );
+  }
+}
+```
+
+## Render React on the Server with renderToString
+
+- So far, you have been rendering React components on the client. Normally, this is what you will always do. However, there are some use cases where it makes sense to render a React component on the server. Since React is a JavaScript view library and you can run JavaScript on the server with Node, this is possible. In fact, React provides a `renderToString()` method you can use for this purpose.
+
+- There are two key reasons why rendering on the server may be used in a real world app. First, without doing this, your React apps would consist of a relatively empty HTML file and a large bundle of JavaScript when it's initially loaded to the browser. This may not be ideal for search engines that are trying to index the content of your pages so people can find you. If you render the initial HTML markup on the server and send this to the client, the initial page load contains all of the page's markup which can be crawled by search engines. Second, this creates a `faster initial page load experience` because the `rendered HTML is smaller than the JavaScript code of the entire app`. React will still be able to recognize your app and manage it after the initial load.
+
+- The renderToString() method is provided on `ReactDOMServer`, which is available here as a global object. The method takes one argument which is a React element. Use this to render App to a string.
+
+```javascript
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    return <div />;
+  }
+}
+
+// change code below this line
+ReactDOMServer.renderToString(<App />);
+```
+
+## Build a Markdown Previewer
+
+- Ref: https://codepen.io/freeCodeCamp/pen/GrZVVO
+
+```html
+<!-- https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.6/marked.js -->
+<div id="app"></div>
+```
+
+```css
+@import url("https://fonts.googleapis.com/css?family=Russo+One");
+$darkAccent: #224b4b;
+$lightAccent: #2cda9d;
+$backgroundBase: #619e9e;
+
+$shadow: 1px 1px 10px 2px darken($backgroundBase, 20%);
+$default-border: 1px solid darken($backgroundBase, 35%);
+
+body {
+  background: lighten($backgroundBase, 12%);
+  margin: 10px 0;
+}
+
+#preview,
+.title {
+  display: inline-block;
+}
+
+.colorScheme {
+  background-color: lighten($backgroundBase, 30%);
+  border: $default-border;
+  box-shadow: $shadow;
+  border-top: none;
+}
+
+.toolbar {
+  position: relative;
+  background-color: lighten($darkAccent, 25%);
+  padding: 4px 4px 3px 3px;
+  border: $default-border;
+  box-shadow: $shadow;
+  font-family: Russo One;
+  font-size: 15px;
+  i {
+    width: 25px;
+    color: black;
+    margin-left: 5px;
+  }
+  .fa-arrows-alt,
+  .fa-compress {
+    position: absolute;
+    right: -5px;
+  }
+}
+
+.fa-retweet,
+.fa-compress,
+.fa-arrows-alt {
+  &:hover {
+    color: lighten($lightAccent, 10%);
+    cursor: pointer;
+  }
+}
+
+.fa-free-code-camp {
+  margin-right: 3px;
+}
+
+.editorWrap {
+  width: 600px;
+  margin: 18px auto;
+  .toolbar {
+    width: 99%;
+  }
+  textarea {
+    @extend .colorScheme;
+    width: 99%;
+    min-height: 200px;
+    margin-bottom: -5px;
+    resize: vertical;
+    outline: none;
+    padding-left: 5px;
+    padding-top: 5px;
+    font-size: 12px;
+  }
+}
+
+.converter {
+  width: 100px;
+  text-align: center;
+  font-size: 35px;
+  margin: auto;
+}
+
+.previewWrap {
+  @extend .colorScheme;
+  width: 800px;
+  margin: 20px auto;
+  min-height: 200px;
+  overflow-wrap: break-word;
+  padding-right: 20px;
+  .toolbar {
+    left: -1px;
+    width: 100%;
+    padding-right: 17px;
+  }
+  #preview {
+    margin-left: 5px;
+    margin-top: -10px;
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 850px) {
+  .previewWrap {
+    width: 630px;
+  }
+  .editorWrap {
+    width: 550px;
+  }
+}
+
+.maximized {
+  width: 96%;
+  min-height: 100vh;
+  margin: auto;
+  textarea {
+    min-height: 95vh;
+    resize: none;
+  }
+}
+
+.hide {
+  display: none;
+}
+
+@media screen and (max-width: 650px) {
+  body {
+    margin: 5px 0;
+  }
+  .editorWrap {
+    width: 80vw;
+    margin: 0 auto;
+  }
+  .maximized {
+    width: 95%;
+    margin: auto;
+  }
+  .previewWrap {
+    width: 95vw;
+    #preview {
+      width: 100%;
+      img {
+        height: 200px;
+      }
+    }
+  }
+}
+
+// MARKDOWN STYLES
+#preview {
+  blockquote {
+    border-left: 3px solid #224b4b;
+    color: #224b4b;
+    padding-left: 5px;
+    margin-left: 25px;
+  }
+
+  code {
+    background: white;
+    padding: 1px 4px 2px 4px;
+    font-size: 12px;
+    font-weight: bold;
+  }
+
+  pre {
+    background: white;
+    padding: 5px 0 5px 5px;
+  }
+
+  h1 {
+    border-bottom: 2px solid $darkAccent;
+  }
+
+  h2 {
+    border-bottom: 1px solid $darkAccent;
+  }
+
+  table {
+    border-collapse: collapse;
+  }
+
+  td,
+  th {
+    border: 2px solid $darkAccent;
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
+```
+
+```javascript
+/* globals marked, React, ReactDOM */
+/* eslint-disable react/prop-types, no-nested-ternary */
+
+// View a more complex version of this project with custom toolbar here:
+// https://codepen.io/no_stack_dub_sack/pen/JbPZvm?editors=0110
+
+// coded by @no-stack-dub-sack (github) / @no_stack_sub_sack (codepen)
+
+// eslint-disable-next-line no-unused-vars
+const projectName = "markdown-previewer";
+
+// ALLOWS LINE BREAKS WITH RETURN BUTTON
+marked.setOptions({
+  breaks: true,
+});
+
+// INSERTS target="_blank" INTO HREF TAGS (required for codepen links)
+const renderer = new marked.Renderer();
+renderer.link = function (href, title, text) {
+  return `<a target="_blank" href="${href}">${text}` + "</a>";
+};
+
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      markdown: placeholder,
+      editorMaximized: false,
+      previewMaximized: false,
+    };
+    this.handleChange = this.handleChange.bind(this);
+    this.handleEditorMaximize = this.handleEditorMaximize.bind(this);
+    this.handlePreviewMaximize = this.handlePreviewMaximize.bind(this);
+  }
+  handleChange(e) {
+    this.setState({
+      markdown: e.target.value,
+    });
+  }
+  handleEditorMaximize() {
+    this.setState({
+      editorMaximized: !this.state.editorMaximized,
+    });
+  }
+  handlePreviewMaximize() {
+    this.setState({
+      previewMaximized: !this.state.previewMaximized,
+    });
+  }
+  render() {
+    const classes = this.state.editorMaximized
+      ? ["editorWrap maximized", "previewWrap hide", "fa fa-compress"]
+      : this.state.previewMaximized
+      ? ["editorWrap hide", "previewWrap maximized", "fa fa-compress"]
+      : ["editorWrap", "previewWrap", "fa fa-arrows-alt"];
+    return (
+      <div>
+        <div className={classes[0]}>
+          <Toolbar
+            icon={classes[2]}
+            onClick={this.handleEditorMaximize}
+            text='Editor'
+          />
+          <Editor markdown={this.state.markdown} onChange={this.handleChange} />
+        </div>
+        <div className='converter' />
+        <div className={classes[1]}>
+          <Toolbar
+            icon={classes[2]}
+            onClick={this.handlePreviewMaximize}
+            text='Previewer'
+          />
+          <Preview markdown={this.state.markdown} />
+        </div>
+      </div>
+    );
+  }
+}
+
+const Toolbar = (props) => {
+  return (
+    <div className='toolbar'>
+      <i className='fa fa-free-code-camp' title='no-stack-dub-sack' />
+      {props.text}
+      <i className={props.icon} onClick={props.onClick} />
+    </div>
+  );
+};
+
+const Editor = (props) => {
+  return (
+    <textarea
+      id='editor'
+      onChange={props.onChange}
+      type='text'
+      value={props.markdown}
+    />
+  );
+};
+
+const Preview = (props) => {
+  return (
+    <div
+      dangerouslySetInnerHTML={{
+        __html: marked(props.markdown, { renderer: renderer }),
+      }}
+      id='preview'
+    />
+  );
+};
+
+const placeholder = `# Welcome to my React Markdown Previewer!
+
+## This is a sub-heading...
+### And here's some other cool stuff:
+
+Heres some code, \`<div></div>\`, between 2 backticks.
+
+\`\`\`
+// this is multi-line code:
+
+function anotherExample(firstLine, lastLine) {
+  if (firstLine == '\`\`\`' && lastLine == '\`\`\`') {
+    return multiLineCode;
+  }
+}
+\`\`\`
+
+You can also make text **bold**... whoa!
+Or _italic_.
+Or... wait for it... **_both!_**
+And feel free to go crazy ~~crossing stuff out~~.
+
+There's also [links](https://www.freecodecamp.com), and
+> Block Quotes!
+
+And if you want to get really crazy, even tables:
+
+Wild Header | Crazy Header | Another Header?
+------------ | ------------- | -------------
+Your content can | be here, and it | can be here....
+And here. | Okay. | I think we get it.
+
+- And of course there are lists.
+  - Some are bulleted.
+     - With different indentation levels.
+        - That look like this.
+
+
+1. And there are numbererd lists too.
+1. Use just 1s if you want!
+1. And last but not least, let's not forget embedded images:
+
+![React Logo w/ Text](https://goo.gl/Umyytc)
+`;
+
+ReactDOM.render(<App />, document.getElementById("app"));
+```
+
+## Build a Drum Machine
+
+```javascript
+/* global React, ReactDOM */
+/* eslint-disable react/prop-types, react/no-multi-comp */
+
+// eslint-disable-next-line no-unused-vars
+const projectName = "drum-machine";
+
+// coded by @no-stack-dub-sack (github) / @no_stack_sub_sack (codepen)
+
+const bankOne = [
+  {
+    keyCode: 81,
+    keyTrigger: "Q",
+    id: "Heater-1",
+    url: "https://s3.amazonaws.com/freecodecamp/drums/Heater-1.mp3",
+  },
+  {
+    keyCode: 87,
+    keyTrigger: "W",
+    id: "Heater-2",
+    url: "https://s3.amazonaws.com/freecodecamp/drums/Heater-2.mp3",
+  },
+  {
+    keyCode: 69,
+    keyTrigger: "E",
+    id: "Heater-3",
+    url: "https://s3.amazonaws.com/freecodecamp/drums/Heater-3.mp3",
+  },
+  {
+    keyCode: 65,
+    keyTrigger: "A",
+    id: "Heater-4",
+    url: "https://s3.amazonaws.com/freecodecamp/drums/Heater-4_1.mp3",
+  },
+  {
+    keyCode: 83,
+    keyTrigger: "S",
+    id: "Clap",
+    url: "https://s3.amazonaws.com/freecodecamp/drums/Heater-6.mp3",
+  },
+  {
+    keyCode: 68,
+    keyTrigger: "D",
+    id: "Open-HH",
+    url: "https://s3.amazonaws.com/freecodecamp/drums/Dsc_Oh.mp3",
+  },
+  {
+    keyCode: 90,
+    keyTrigger: "Z",
+    id: "Kick-n'-Hat",
+    url: "https://s3.amazonaws.com/freecodecamp/drums/Kick_n_Hat.mp3",
+  },
+  {
+    keyCode: 88,
+    keyTrigger: "X",
+    id: "Kick",
+    url: "https://s3.amazonaws.com/freecodecamp/drums/RP4_KICK_1.mp3",
+  },
+  {
+    keyCode: 67,
+    keyTrigger: "C",
+    id: "Closed-HH",
+    url: "https://s3.amazonaws.com/freecodecamp/drums/Cev_H2.mp3",
+  },
+];
+
+const bankTwo = [
+  {
+    keyCode: 81,
+    keyTrigger: "Q",
+    id: "Chord-1",
+    url: "https://s3.amazonaws.com/freecodecamp/drums/Chord_1.mp3",
+  },
+  {
+    keyCode: 87,
+    keyTrigger: "W",
+    id: "Chord-2",
+    url: "https://s3.amazonaws.com/freecodecamp/drums/Chord_2.mp3",
+  },
+  {
+    keyCode: 69,
+    keyTrigger: "E",
+    id: "Chord-3",
+    url: "https://s3.amazonaws.com/freecodecamp/drums/Chord_3.mp3",
+  },
+  {
+    keyCode: 65,
+    keyTrigger: "A",
+    id: "Shaker",
+    url: "https://s3.amazonaws.com/freecodecamp/drums/Give_us_a_light.mp3",
+  },
+  {
+    keyCode: 83,
+    keyTrigger: "S",
+    id: "Open-HH",
+    url: "https://s3.amazonaws.com/freecodecamp/drums/Dry_Ohh.mp3",
+  },
+  {
+    keyCode: 68,
+    keyTrigger: "D",
+    id: "Closed-HH",
+    url: "https://s3.amazonaws.com/freecodecamp/drums/Bld_H1.mp3",
+  },
+  {
+    keyCode: 90,
+    keyTrigger: "Z",
+    id: "Punchy-Kick",
+    url: "https://s3.amazonaws.com/freecodecamp/drums/punchy_kick_1.mp3",
+  },
+  {
+    keyCode: 88,
+    keyTrigger: "X",
+    id: "Side-Stick",
+    url: "https://s3.amazonaws.com/freecodecamp/drums/side_stick_1.mp3",
+  },
+  {
+    keyCode: 67,
+    keyTrigger: "C",
+    id: "Snare",
+    url: "https://s3.amazonaws.com/freecodecamp/drums/Brk_Snr.mp3",
+  },
+];
+
+const activeStyle = {
+  backgroundColor: "orange",
+  boxShadow: "0 3px orange",
+  height: 77,
+  marginTop: 13,
+};
+
+const inactiveStyle = {
+  backgroundColor: "grey",
+  marginTop: 10,
+  boxShadow: "3px 3px 5px black",
+};
+
+class DrumPad extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      padStyle: inactiveStyle,
+    };
+    this.playSound = this.playSound.bind(this);
+    this.handleKeyPress = this.handleKeyPress.bind(this);
+    this.activatePad = this.activatePad.bind(this);
+  }
+  componentDidMount() {
+    document.addEventListener("keydown", this.handleKeyPress);
+  }
+  componentWillUnmount() {
+    document.removeEventListener("keydown", this.handleKeyPress);
+  }
+  handleKeyPress(e) {
+    if (e.keyCode === this.props.keyCode) {
+      this.playSound();
+    }
+  }
+  activatePad() {
+    if (this.props.power) {
+      if (this.state.padStyle.backgroundColor === "orange") {
+        this.setState({
+          padStyle: inactiveStyle,
+        });
+      } else {
+        this.setState({
+          padStyle: activeStyle,
+        });
+      }
+    } else if (this.state.padStyle.marginTop === 13) {
+      this.setState({
+        padStyle: inactiveStyle,
+      });
+    } else {
+      this.setState({
+        padStyle: {
+          height: 77,
+          marginTop: 13,
+          backgroundColor: "grey",
+          boxShadow: "0 3px grey",
+        },
+      });
+    }
+  }
+  playSound() {
+    const sound = document.getElementById(this.props.keyTrigger);
+    sound.currentTime = 0;
+    sound.play();
+    this.activatePad();
+    setTimeout(() => this.activatePad(), 100);
+    this.props.updateDisplay(this.props.clipId.replace(/-/g, " "));
+  }
+  render() {
+    return (
+      <div
+        className='drum-pad'
+        id={this.props.clipId}
+        onClick={this.playSound}
+        style={this.state.padStyle}
+      >
+        <audio
+          className='clip'
+          id={this.props.keyTrigger}
+          src={this.props.clip}
+        />
+        {this.props.keyTrigger}
+      </div>
+    );
+  }
+}
+
+class PadBank extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+  render() {
+    let padBank;
+    if (this.props.power) {
+      padBank = this.props.currentPadBank.map((drumObj, i, padBankArr) => {
+        return (
+          <DrumPad
+            clip={padBankArr[i].url}
+            clipId={padBankArr[i].id}
+            keyCode={padBankArr[i].keyCode}
+            keyTrigger={padBankArr[i].keyTrigger}
+            power={this.props.power}
+            updateDisplay={this.props.updateDisplay}
+          />
+        );
+      });
+    } else {
+      padBank = this.props.currentPadBank.map((drumObj, i, padBankArr) => {
+        return (
+          <DrumPad
+            clip='#'
+            clipId={padBankArr[i].id}
+            keyCode={padBankArr[i].keyCode}
+            keyTrigger={padBankArr[i].keyTrigger}
+            power={this.props.power}
+            updateDisplay={this.props.updateDisplay}
+          />
+        );
+      });
+    }
+    return <div className='pad-bank'>{padBank}</div>;
+  }
+}
+
+class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      power: true,
+      display: String.fromCharCode(160),
+      currentPadBank: bankOne,
+      currentPadBankId: "Heater Kit",
+      sliderVal: 0.3,
+    };
+    this.displayClipName = this.displayClipName.bind(this);
+    this.selectBank = this.selectBank.bind(this);
+    this.adjustVolume = this.adjustVolume.bind(this);
+    this.powerControl = this.powerControl.bind(this);
+    this.clearDisplay = this.clearDisplay.bind(this);
+  }
+  powerControl() {
+    this.setState({
+      power: !this.state.power,
+      display: String.fromCharCode(160),
+    });
+  }
+  selectBank() {
+    if (this.state.power) {
+      if (this.state.currentPadBankId === "Heater Kit") {
+        this.setState({
+          currentPadBank: bankTwo,
+          display: "Smooth Piano Kit",
+          currentPadBankId: "Smooth Piano Kit",
+        });
+      } else {
+        this.setState({
+          currentPadBank: bankOne,
+          display: "Heater Kit",
+          currentPadBankId: "Heater Kit",
+        });
+      }
+    }
+  }
+  displayClipName(name) {
+    if (this.state.power) {
+      this.setState({
+        display: name,
+      });
+    }
+  }
+  adjustVolume(e) {
+    if (this.state.power) {
+      this.setState({
+        sliderVal: e.target.value,
+        display: "Volume: " + Math.round(e.target.value * 100),
+      });
+      setTimeout(() => this.clearDisplay(), 1000);
+    }
+  }
+  clearDisplay() {
+    this.setState({
+      display: String.fromCharCode(160),
+    });
+  }
+  render() {
+    const powerSlider = this.state.power
+      ? {
+          float: "right",
+        }
+      : {
+          float: "left",
+        };
+    const bankSlider =
+      this.state.currentPadBank === bankOne
+        ? {
+            float: "left",
+          }
+        : {
+            float: "right",
+          };
+    {
+      const clips = [].slice.call(document.getElementsByClassName("clip"));
+      clips.forEach((sound) => {
+        sound.volume = this.state.sliderVal;
+      });
+    }
+    return (
+      <div className='inner-container' id='drum-machine'>
+        <PadBank
+          clipVolume={this.state.sliderVal}
+          currentPadBank={this.state.currentPadBank}
+          power={this.state.power}
+          updateDisplay={this.displayClipName}
+        />
+
+        <div className='logo'>
+          <div className='inner-logo '>{"FCC" + String.fromCharCode(160)}</div>
+          <i className='inner-logo fa fa-free-code-camp' />
+        </div>
+
+        <div className='controls-container'>
+          <div className='control'>
+            <p>Power</p>
+            <div className='select' onClick={this.powerControl}>
+              <div className='inner' style={powerSlider} />
+            </div>
+          </div>
+          <p id='display'>{this.state.display}</p>
+          <div className='volume-slider'>
+            <input
+              max='1'
+              min='0'
+              onChange={this.adjustVolume}
+              step='0.01'
+              type='range'
+              value={this.state.sliderVal}
+            />
+          </div>
+          <div className='control'>
+            <p>Bank</p>
+            <div className='select' onClick={this.selectBank}>
+              <div className='inner' style={bankSlider} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+}
+
+ReactDOM.render(<App />, document.getElementById("root"));
+```
+## Build a JavaScript Calculator
+
+```javascript
+/* global React, ReactDOM */
+/* eslint-disable react/prop-types, react/no-multi-comp,
+ no-eval, no-nested-ternary */
+
+// eslint-disable-next-line no-unused-vars
+const projectName = 'javascript-calculator';
+
+// To see a more advanced version of this app with features such as toggle sign
+// and Clear Entry buttons, see this pen
+// https://codepen.io/no_stack_dub_sack/full/jrxpKP/
+
+// coded by @no-stack-dub-sack (github) / @no_stack_sub_sack (codepen)
+
+// VARS:
+const isOperator = /[x/+‑]/, //+3 or 3+5 or 3+
+  endsWithOperator = /[x+‑/]$/, //2- or 9+ or 10/
+  endsWithNegativeSign = /\d[x/+‑]{1}‑$/, // 8*- or 8+- or 8/-
+  clearStyle = { background: '#ac3939' },
+  operatorStyle = { background: '#666666' },
+  equalsStyle = {
+    background: '#004466',
+    position: 'absolute',
+    height: 130,
+    bottom: 5
+  };
+
+// COMPONENTS:
+class Calculator extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      currentVal: '0',
+      prevVal: '0',
+      formula: '',
+      currentSign: 'pos',
+      lastClicked: ''
+    };
+    this.maxDigitWarning = this.maxDigitWarning.bind(this);
+    this.handleOperators = this.handleOperators.bind(this);
+    this.handleEvaluate = this.handleEvaluate.bind(this);
+    this.initialize = this.initialize.bind(this);
+    this.handleDecimal = this.handleDecimal.bind(this);
+    this.handleNumbers = this.handleNumbers.bind(this);
+  }
+
+  maxDigitWarning() {
+    this.setState({
+      currentVal: 'Digit Limit Met',
+      prevVal: this.state.currentVal
+    });
+    setTimeout(() => this.setState({ currentVal: this.state.prevVal }), 1000);
+  }
+
+  handleEvaluate() {
+    if (!this.state.currentVal.includes('Limit')) {
+      let expression = this.state.formula;
+      while (endsWithOperator.test(expression)) {
+        expression = expression.slice(0, -1); // remove end with [+,-,/,*] e.g 3+2/45+++++ = 45
+      }
+      expression = expression
+        .replace(/x/g, '*')
+        .replace(/‑/g, '-')
+        .replace('--', '+0+0+0+0+0+0+');
+      let answer = Math.round(1000000000000 * eval(expression)) / 1000000000000;
+      this.setState({
+        currentVal: answer.toString(),
+        formula:
+          expression
+            .replace(/\*/g, '⋅')
+            .replace(/-/g, '‑')
+            .replace('+0+0+0+0+0+0+', '‑-')
+            .replace(/(x|\/|\+)‑/, '$1-')
+            .replace(/^‑/, '-') +
+          '=' +
+          answer,
+        prevVal: answer,
+        evaluated: true
+      });
+    }
+  }
+
+  handleOperators(e) {
+    if (!this.state.currentVal.includes('Limit')) {
+      const value = e.target.value;
+      const { formula, prevVal, evaluated } = this.state;
+      this.setState({ currentVal: value, evaluated: false });
+      if (evaluated) {
+        this.setState({ formula: prevVal + value });
+      } else if (!endsWithOperator.test(formula)) {
+        this.setState({
+          prevVal: formula,
+          formula: formula + value
+        });
+      } else if (!endsWithNegativeSign.test(formula)) {
+        this.setState({
+          formula:
+            (endsWithNegativeSign.test(formula + value) ? formula : prevVal) +
+            value
+        });
+      } else if (value !== '‑') {
+        this.setState({
+          formula: prevVal + value
+        });
+      }
+    }
+  }
+
+  handleNumbers(e) {
+    if (!this.state.currentVal.includes('Limit')) {
+      const { currentVal, formula, evaluated } = this.state;
+      const value = e.target.value;
+      this.setState({ evaluated: false });
+      if (currentVal.length > 21) {
+        this.maxDigitWarning();
+      } else if (evaluated) {
+        this.setState({
+          currentVal: value,
+          formula: value !== '0' ? value : ''
+        });
+      } else {
+        this.setState({
+          currentVal:
+            currentVal === '0' || isOperator.test(currentVal) // 0 or 2+2+
+              ? value
+              : currentVal + value,
+          formula:
+            currentVal === '0' && value === '0'
+              ? formula === ''
+                ? value
+                : formula
+              : /([^.0-9]0|^0)$/.test(formula) //+0 or 0
+              ? formula.slice(0, -1) + value
+              : formula + value
+        });
+      }
+    }
+  }
+
+  handleDecimal() {
+    if (this.state.evaluated === true) {
+      this.setState({
+        currentVal: '0.',
+        formula: '0.',
+        evaluated: false
+      });
+    } else if (
+      !this.state.currentVal.includes('.') &&
+      !this.state.currentVal.includes('Limit')
+    ) {
+      this.setState({ evaluated: false });
+      if (this.state.currentVal.length > 21) {
+        this.maxDigitWarning();
+      } else if (
+        endsWithOperator.test(this.state.formula) ||
+        (this.state.currentVal === '0' && this.state.formula === '')
+      ) {
+        this.setState({
+          currentVal: '0.',
+          formula: this.state.formula + '0.'
+        });
+      } else {
+        this.setState({
+          currentVal: this.state.formula.match(/(-?\d+\.?\d*)$/)[0] + '.', // get last numbers: 22.33+111+22/33*555 = 555.
+          formula: this.state.formula + '.'
+        });
+      }
+    }
+  }
+
+  initialize() {
+    this.setState({
+      currentVal: '0',
+      prevVal: '0',
+      formula: '',
+      currentSign: 'pos',
+      lastClicked: '',
+      evaluated: false
+    });
+  }
+
+  render() {
+    return (
+      <div>
+        <div className="calculator">
+          <Formula formula={this.state.formula.replace(/x/g, '⋅')} />
+          <Output currentValue={this.state.currentVal} />
+          <Buttons
+            decimal={this.handleDecimal}
+            evaluate={this.handleEvaluate}
+            initialize={this.initialize}
+            numbers={this.handleNumbers}
+            operators={this.handleOperators}
+          />
+        </div>
+        <div className="author">
+          {' '}
+          Designed and Coded By <br />
+          <a href="https://goo.gl/6NNLMG" target="_blank">
+            Peter Weinberg
+          </a>
+        </div>
+      </div>
+    );
+  }
+}
+
+class Buttons extends React.Component {
+  render() {
+    return (
+      <div>
+        <button
+          className="jumbo"
+          id="clear"
+          onClick={this.props.initialize}
+          style={clearStyle}
+          value="AC"
+        >
+          AC
+        </button>
+        <button
+          id="divide"
+          onClick={this.props.operators}
+          style={operatorStyle}
+          value="/"
+        >
+          /
+        </button>
+        <button
+          id="multiply"
+          onClick={this.props.operators}
+          style={operatorStyle}
+          value="x"
+        >
+          x
+        </button>
+        <button id="seven" onClick={this.props.numbers} value="7">
+          7
+        </button>
+        <button id="eight" onClick={this.props.numbers} value="8">
+          8
+        </button>
+        <button id="nine" onClick={this.props.numbers} value="9">
+          9
+        </button>
+        <button
+          id="subtract"
+          onClick={this.props.operators}
+          style={operatorStyle}
+          value="‑"
+        >
+          ‑
+        </button>
+        <button id="four" onClick={this.props.numbers} value="4">
+          4
+        </button>
+        <button id="five" onClick={this.props.numbers} value="5">
+          5
+        </button>
+        <button id="six" onClick={this.props.numbers} value="6">
+          6
+        </button>
+        <button
+          id="add"
+          onClick={this.props.operators}
+          style={operatorStyle}
+          value="+"
+        >
+          +
+        </button>
+        <button id="one" onClick={this.props.numbers} value="1">
+          1
+        </button>
+        <button id="two" onClick={this.props.numbers} value="2">
+          2
+        </button>
+        <button id="three" onClick={this.props.numbers} value="3">
+          3
+        </button>
+        <button
+          className="jumbo"
+          id="zero"
+          onClick={this.props.numbers}
+          value="0"
+        >
+          0
+        </button>
+        <button id="decimal" onClick={this.props.decimal} value=".">
+          .
+        </button>
+        <button
+          id="equals"
+          onClick={this.props.evaluate}
+          style={equalsStyle}
+          value="="
+        >
+          =
+        </button>
+      </div>
+    );
+  }
+}
+
+class Output extends React.Component {
+  render() {
+    return (
+      <div className="outputScreen" id="display">
+        {this.props.currentValue}
+      </div>
+    );
+  }
+}
+
+class Formula extends React.Component {
+  render() {
+    return <div className="formulaScreen">{this.props.formula}</div>;
+  }
+}
+
+ReactDOM.render(<Calculator />, document.getElementById('app'));
+```
