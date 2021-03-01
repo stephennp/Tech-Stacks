@@ -288,6 +288,7 @@ req.body: {userId: '546', bookId: '6754'}
 ## Exercise tracker
 
 ## File metadata microservice
+
 ## Set up a Template Engine (Pug)
 
 - A template engine enables you to use static template files (such as those written in `Pug`) in your app. At runtime, the template engine replaces variables in a template file with actual values which can be supplied by your server. Then it transforms the template into a static HTML file that is sent to the client. This approach makes it easier to design an HTML page and allows for displaying variables on the page without needing to make an API call from the client.
@@ -792,6 +793,156 @@ socket.on("disconnect", () => {
 - To make sure clients continuously have the updated count of current users, you should decrease the currentUsers by 1 when the disconnect happens then emit the 'user count' event with the updated count!
 
 - Note: Just like 'disconnect', all other events that a socket can emit to the server should be handled within the connecting listener where we have 'socket' defined.
+
+## Authentication with Socket.IO
+
+- Currently, you cannot determine who is connected to your web socket. While req.user contains the user object, that's only when your user interacts with the web server, and with web sockets you have no req (request) and therefore no user data. One way to solve the problem of knowing who is connected to your web socket is by parsing and decoding the cookie that contains the passport session then deserializing it to obtain the user object. Luckily, there is a package on NPM just for this that turns a once complex task into something simple!
+
+- Add passport.socketio, connect-mongo, and cookie-parser as dependencies and require them as passportSocketIo, MongoStore, and cookieParser respectively. Also, we need to initialize a new memory store, from express-session which we previously required. It should look like this:
+
+```javascript
+const MongoStore = require('connect-mongo')(session);
+const URI = process.env.MONGO_URI;
+const store = new MongoStore({ url: URI });
+Now we just have to tell Socket.IO to use it and set the options. Be sure this is added before the existing socket code and not in the existing connection listener. For your server, it should look like this:
+
+io.use(
+  passportSocketIo.authorize({
+    cookieParser: cookieParser,
+    key: 'express.sid',
+    secret: process.env.SESSION_SECRET,
+    store: store,
+    success: onAuthorizeSuccess,
+    fail: onAuthorizeFail
+  })
+);
+```
+
+- Be sure to add the key and store to the session middleware mounted on the app. This is necessary to tell SocketIO which session to relate to.
+
+- Now, define the success, and fail callback functions:
+
+```javascript
+function onAuthorizeSuccess(data, accept) {
+  console.log("successful connection to socket.io");
+
+  accept(null, true);
+}
+
+function onAuthorizeFail(data, message, error, accept) {
+  if (error) throw new Error(message);
+  console.log("failed connection to socket.io:", message);
+  accept(null, false);
+}
+```
+
+- The user object is now accessible on your socket object as socket.request.user. For example, now you can add the following:
+
+```javascript
+console.log("user " + socket.request.user.name + " connected");
+```
+
+- It will log to the server console who has connected!
+
+## Announce New Users
+
+- Many chat rooms are able to announce when a user connects or disconnects and then display that to all of the connected users in the chat. Seeing as though you already are emitting an event on connect and disconnect, you will just have to modify this event to support such a feature. The most logical way of doing so is sending 3 pieces of data with the event: the name of the user who connected/disconnected, the current user count, and if that name connected or disconnected.
+
+- Change the event name to 'user', and pass an object along containing the fields 'name', 'currentUsers', and 'connected' (to be true in case of connection, or false for disconnection of the user sent). Be sure to change both 'user count' events and set the disconnect one to send false for the field 'connected' instead of true like the event emitted on connect.
+
+```javascript
+io.emit("user", {
+  name: socket.request.user.name,
+  currentUsers,
+  connected: true,
+});
+```
+
+- Now your client will have all the necessary information to correctly display the current user count and announce when a user connects or disconnects! To handle this event on the client side we should listen for 'user', then update the current user count by using jQuery to change the text of #num-users to '{NUMBER} users online', as well as append a <li> to the unordered list with id messages with '{NAME} has {joined/left} the chat.'.
+
+- An implementation of this could look like the following:
+
+```javascript
+socket.on("user", (data) => {
+  $("#num-users").text(data.currentUsers + " users online");
+  let message =
+    data.name +
+    (data.connected ? " has joined the chat." : " has left the chat.");
+  $("#messages").append($("<li>").html("<b>" + message + "</b>"));
+});
+```
+
+## end and Display Chat Messages
+
+- It's time you start allowing clients to send a chat message to the server to emit to all the clients! In your client.js file, you should see there is already a block of code handling when the message form is submitted.
+
+```javascript
+$("form").submit(function () {
+  /*logic*/
+});
+```
+
+- Within the form submit code, you should emit an event after you define messageToSend but before you clear the text box #m. The event should be named 'chat message' and the data should just be messageToSend.
+
+```javascript
+socket.emit("chat message", messageToSend);
+```
+
+- Now, on your server, you should be listening to the socket for the event 'chat message' with the data being named message. Once the event is received, it should emit the event 'chat message' to all sockets io.emit with the data being an object containing name and message.
+
+- In client.js, you should now listen for event 'chat message' and, when received, append a list item to #messages with the name, a colon, and the message!
+
+- At this point, the chat should be fully functional and sending messages across all clients!
+
+## Metric-Imperial Converter
+
+- convertHandler should correctly read a whole number input.
+- convertHandler should correctly read a decimal number input.
+- convertHandler should correctly read a fractional input.
+- convertHandler should correctly read a fractional input with a decimal.
+- convertHandler should correctly return an error on a double-fraction (i.e. 3/2/3).
+- convertHandler should correctly default to a numerical input of 1 when no numerical input is provided.
+- convertHandler should correctly read each valid input unit.
+- convertHandler should correctly return an error for an invalid input unit.
+- convertHandler should return the correct return unit for each valid input unit.
+- convertHandler should correctly return the spelled-out string unit for each valid input unit.
+- convertHandler should correctly convert gal to L.
+- convertHandler should correctly convert L to gal.
+- convertHandler should correctly convert mi to km.
+- convertHandler should correctly convert km to mi.
+- convertHandler should correctly convert lbs to kg.
+- convertHandler should correctly convert kg to lbs.
+- Write the following tests in tests/2_functional-tests.js:
+  - Convert a valid input such as 10L: GET request to /api/convert.
+  - Convert an invalid input such as 32g: GET request to /api/convert.
+  - Convert an invalid number such as 3/7.2/4kg: GET request to /api/convert.
+  - Convert an invalid number AND unit such as 3/7.2/4kilomegagram: GET request to /api/convert.
+  - Convert with no number such as kg: GET request to /api/convert.
+
+## Sudoku Solver
+
+- All puzzle logic can go into `/controllers/sudoku-solver.js`
+  - The validate function should take a given puzzle string and check it to see if it has 81 valid characters for the input.
+  - The check functions should be validating against the current state of the board.
+  - The solve function should handle solving any given valid puzzle string, not just the test inputs and solutions. You are expected to write out the logic to solve this.
+- All routing logic can go into /routes/api.js
+- See the puzzle-strings.js file in /controllers for some sample puzzles your application should solve
+- To run the challenge tests on this page, set NODE_ENV to test without quotes in the .env file
+- To run the tests in the console, use the command npm run test. To open the Repl.it console, press Ctrl+Shift+P (Cmd if on a Mac) and type "open shell"
+- Write the following tests in tests/1_unit-tests.js:
+
+  - Logic handles a valid puzzle string of 81 characters
+  - Logic handles a puzzle string with invalid characters (not 1-9 or .)
+  - Logic handles a puzzle string that is not 81 characters in length
+  - Logic handles a valid row placement
+  - Logic handles an invalid row placement
+  - Logic handles a valid column placement
+  - Logic handles an invalid column placement
+  - Logic handles a valid region (3x3 grid) placement
+  - Logic handles an invalid region (3x3 grid) placement
+  - Valid puzzle strings pass the solver
+  - Invalid puzzle strings fail the solver
+  - Solver returns the the expected solution for an incomplete puzzzle
 
 # References:
 
